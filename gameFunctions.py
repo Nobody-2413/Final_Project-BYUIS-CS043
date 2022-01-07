@@ -15,6 +15,7 @@ class Player(object):
         if self.validMove(move):
             self.board[move] = self.side
 
+
 class Computer(Player):
     def __init__(self, side, board):
         super().__init__(side, board)

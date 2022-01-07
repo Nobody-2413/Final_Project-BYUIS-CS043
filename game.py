@@ -13,8 +13,17 @@ playerForm = '''
         <h3>{} Move (1 to 9): <input type="text" name="{}"><input type="submit" name="Enter"></h3>
     </form>
 '''
+
+startButton = '''
+<form action="/playGame">
+    <input type="submit" value="Start">
+</form>
+'''
+
 side1 = None
 side2 = None
+player1 = ""
+player2 = ""
 
 def application(environ, start_response):
     headers = [('Content-Type', 'text/html; charset=utf-8')]
@@ -34,6 +43,8 @@ def application(environ, start_response):
             if mode.isdigit() and int(mode) in [1,2]:
                 page = extractCode("chooseSide.html")
                 formatting = "Player 1" if mode == 2 else "Player"
+                player1 = formatting
+                player2 = "Computer" if player1 == "Player" else "Player 2"
                 return [page.format(formatting).encode()]
         page = extractCode("homePage.html")
         page += "<h3>Please enter a valid mode</h3>"
@@ -42,6 +53,15 @@ def application(environ, start_response):
     elif path == "/chooseSide":
         side = params["side"][0] if "side" in params else None
         start_response("200 OK", headers)
+        if side:
+            if side.upper() in ['X' 'O']:
+                side1 = side.upper()
+                side2 = 'O' if side == 'X' else 'X'
+                page = extractCode("displayBoard.html")
+
+        page = extractCode("chooseSide.html")
+        page += "<h3>Please enter a valid side</h3>"
+        return [page.encode()]
     else:
         start_response("404 Not Found", headers)
         return ["Status 404: Resource not found".encode()]
