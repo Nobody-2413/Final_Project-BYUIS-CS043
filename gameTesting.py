@@ -50,8 +50,8 @@ def goFirst():
 
 def playGame(playerSide, computerSide):
     board = [" " for x in range(9)]
-    player = Player(playerSide, board)
-    computer = Computer(computerSide, board)
+    player = Player(playerSide, board, "Player")
+    computer = Computer(computerSide, board, "Computer")
     turn, message = goFirst()
     print(message)
     printBoard(board)

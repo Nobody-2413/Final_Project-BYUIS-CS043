@@ -1,9 +1,10 @@
 import random
 
 class Player(object):
-    def __init__(self, side, board):
+    def __init__(self, side, board, name):
         self.side = side
         self.board = board
+        self.name = name
 
     def validMove(self, move):
         if move in range(9) and self.board[move] == " ":
@@ -17,8 +18,8 @@ class Player(object):
 
 
 class Computer(Player):
-    def __init__(self, side, board):
-        super().__init__(side, board)
+    def __init__(self, side, board, name):
+        super().__init__(side, board, name)
 
     def findValidMove(self):
         empties = []

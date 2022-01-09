@@ -1,6 +1,7 @@
 import wsgiref.simple_server
 import urllib.parse
 import http.cookies
+import gameFunctions as func
 
 def extractCode(filename):
     file = open(filename, "r")
@@ -50,13 +51,13 @@ def application(environ, start_response):
     elif path == "/chooseSide":
         if 'HTTP_COOKIE' not in environ:
             start_response("200 OK", headers)
-            return [extractCode("issue.html").encode()]
+            return [extractCode("homePage.html").encode()]
 
         cookies = http.cookies.SimpleCookie()
         cookies.load(environ['HTTP_COOKIE'])
         if 'mode' not in cookies:
             start_response("200 OK", headers)
-            return [extractCode("issue.html").encode()]
+            return [extractCode("homePage.html").encode()]
         mode = int(cookies['mode'].value)
         player1 = "Player" if mode == 1 else "Player 1"
         player2 = "Computer" if player1 == "Player" else "Player 2"
@@ -74,6 +75,27 @@ def application(environ, start_response):
         start_response("200 OK", headers)
         page = extractCode("chooseSide.html").format(player1)
         page += "<h3>Please enter a valid side.</h3>"
+        return [page.encode()]
+
+
+    elif path == "/playGame":
+        if 'HTTP_COOKIE' not in environ:
+            start_response("200 OK", headers)
+            return [extractCode("homePage.html").encode()]
+
+        cookies = http.cookies.SimpleCookie()
+        cookies.load(environ['HTTP_COOKIE'])
+        if not ('mode' in cookies and 'side1' in cookies):
+            start_response("200 OK", headers)
+            return [extractCode("homePage.html").encode()]
+
+        mode = int(cookies['mode'].value)
+        player1 = "Player" if mode == 1 else "Player 1"
+        player2 = "Computer" if player1 == "Player" else "Player 2"
+        side1 = cookies['side1'].value
+        side2 = "O" if side1 == "X" else "X"
+        p = extractCode("displayBoard.html")
+        page = p.format(player1, side1, player2, side2, "~", "~", "~", "~", "~", "~", "~", "~", "~", playerForm)
         return [page.encode()]
 
 
