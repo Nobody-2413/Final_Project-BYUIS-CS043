@@ -7,7 +7,7 @@ class Player(object):
         self.name = name
 
     def validMove(self, move):
-        if move in range(9) and self.board[move] == " ":
+        if move in range(9) and self.board[move] == "~":
             return True
         else:
             return False
@@ -36,7 +36,7 @@ class Computer(Player):
             if win(self.side, boardCopy):
                 return m
             else:
-                boardCopy[m] = " "
+                boardCopy[m] = "~"
 
         opponentSide = "X" if self.side != "X" else "O"
         for m in validMoves:
@@ -44,7 +44,7 @@ class Computer(Player):
             if win(opponentSide, boardCopy):
                 return m
             else:
-                boardCopy[m] = " "
+                boardCopy[m] = "~"
 
         if self.validMove(4):
             return 4
@@ -60,7 +60,7 @@ class Computer(Player):
 
 def boardFull(board):
     for x in board:
-        if x == " ":
+        if x == "~":
             return False
     return True
 
@@ -75,5 +75,5 @@ def win(side, board):
          or (board[0] == side and board[4] == side and board[8] == side) # left cross
          or (board[2] == side and board[4] == side and board[6] == side)) # right cross
 
-def goFirst():
+def gofirst():
     return random.choice(['X', 'O'])

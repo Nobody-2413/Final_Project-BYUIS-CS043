@@ -28,7 +28,7 @@ def playerMoveInput(board):
     while True:
         move = input("Enter Move (1 to 9): ").lower()
         if move.isdigit():
-            if (int(move)-1 in range(9) and board[int(move)-1] == " "):
+            if (int(move)-1 in range(9) and board[int(move)-1] == "~"):
                 return int(move) - 1
         elif move == "q":
             return "quit"
@@ -49,7 +49,7 @@ def goFirst():
 # printBoard(board)
 
 def playGame(playerSide, computerSide):
-    board = [" " for x in range(9)]
+    board = ["~" for x in range(9)]
     player = Player(playerSide, board, "Player")
     computer = Computer(computerSide, board, "Computer")
     turn, message = goFirst()

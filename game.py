@@ -11,7 +11,7 @@ def extractCode(filename):
 
 playerForm = '''
     <form action="/input">
-        <h3><font face="Courier new" size="4">{} Move (1 to 9): </font><input type="text" name="{}"><input type="submit" name="Enter"></h3>
+        <h3><font face="Courier new" size="4">{} Move (1 to 9): </font><input type="text" name="move"><input type="submit" name="Enter"></h3>
     </form>
 '''
 
@@ -20,6 +20,25 @@ startButton = '''
     <input type="submit" value="Start">
 </form>
 '''
+
+p1 = None
+p2 = None
+
+def determineNames(mode):
+    name1 = "Player 1" if mode == 2 else "Player"
+    name2 = "Player 2" if name1 == "Player 1" else "Computer"
+    return [name1, name2]
+
+
+def determineSides(side1):
+    s1 = side1
+    s2 = "O" if s1 == "X" else "X"
+    return [s1, s2]
+
+
+def formattedPage(page, n1, s1, n2, s2, board, inputType):
+    return page.format(n1, s1, n2, s2, board[0], board[1], board[2], board[3], board[4], board[5], board[6], board[7], board[8], inputType)
+
 
 def application(environ, start_response):
     headers = [('Content-Type', 'text/html; charset=utf-8')]
@@ -59,8 +78,8 @@ def application(environ, start_response):
             start_response("200 OK", headers)
             return [extractCode("homePage.html").encode()]
         mode = int(cookies['mode'].value)
-        player1 = "Player" if mode == 1 else "Player 1"
-        player2 = "Computer" if player1 == "Player" else "Player 2"
+        player1, player2 = determineNames(mode)
+
         side = params["side"][0] if "side" in params else None
         if side:
             side = side.upper()
@@ -90,12 +109,31 @@ def application(environ, start_response):
             return [extractCode("homePage.html").encode()]
 
         mode = int(cookies['mode'].value)
-        player1 = "Player" if mode == 1 else "Player 1"
-        player2 = "Computer" if player1 == "Player" else "Player 2"
-        side1 = cookies['side1'].value
-        side2 = "O" if side1 == "X" else "X"
+        side = cookies['side1'].value
+        n1, n2 = determineNames(mode)
+        side1, side2 = determineSides(side)
+
+        board = ["~" for x in range(9)]
+        next = func.gofirst()
+
+        if mode == 1:
+            p1 = func.Player(side1, board, n1)
+            p2 = func.Computer(side2, board, n2)
+
+            if next == p2.side:
+                move = p2.chooseMove()
+                p2.makeMove(move)
+                next = p1.side
+
+        inpName = n1 if next == side1 else n2
+
+        headers.append(('Set-Cookie', 'next={}'.format(next)))
+        headers.append(('Set-Cookie', 'board={}'.format(",".join(board))))
         p = extractCode("displayBoard.html")
-        page = p.format(player1, side1, player2, side2, "~", "~", "~", "~", "~", "~", "~", "~", "~", playerForm)
+        inpBox = playerForm.format(inpName)
+        page = formattedPage(p, n1, side1, n2, side2, board, inpBox)
+
+        start_response("200 OK", headers)
         return [page.encode()]
 
 
