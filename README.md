@@ -2,7 +2,7 @@
 Final Project for BYUIS CS Semester 2
 Tic-Tac-Toe Game HTML
 
-It all developed by Shuoshuo Li with no starter code.
+It is all developed by Shuoshuo Li with no starter code.
 
 Here are the steps to run the game:
 1. Run game.py
