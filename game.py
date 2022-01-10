@@ -173,21 +173,25 @@ def application(environ, start_response):
             p1 = func.Player(s1, board, n1)
             p2 = func.Player(s2, board, n2)
             player = p1 if next == p1.side else p2
-
         # Check input move
         response = "<h3>Please enter a valid move.</h3>"
 
         move = params['move'][0] if 'move' in params else None
+
         if move:
-            if (move.isdigit() and player.validMove(move)):
-                player.makeMove(move)
+            if (move.isdigit() and player.validMove(int(move)-1)):
+                player.makeMove(int(move) - 1)
                 # Check whether the board is full or a side had won
+                if func.win(p1.side, board) or func.win(p2.side, board):
+                    winner = p1.name if func.win(p1.side, board) else p2.name
+                    response = "<h3>Winner: {}</h3>".format(winner)
+                    p = extractCode("displayBoard.html") + response
+                    page = formattedPage(p, n1, s1, n2, s2, board, homeButton)
+                    start_response("200 OK", headers)
+                    return [page.encode()]
+
                 if func.boardFull(board):
-                    if func.win(p1.side, board) or func.win(p2.side, board):
-                        winner = p1.name if func.win(p1.side, board) else p2.name
-                        response = "<h3>Winner: {}</h3>".format(winner)
-                    else:
-                        response = "<h3>Is a tie game!</h3>"
+                    response = "<h3>Is a tie game!</h3>"
                     p = extractCode("displayBoard.html") + response
                     page = formattedPage(p, n1, s1, n2, s2, board, homeButton)
                     start_response("200 OK", headers)
@@ -201,7 +205,7 @@ def application(environ, start_response):
                 else:
                     next = "X" if player.side == "O" else "O"
                 headers.append(("Set-Cookie", "next={}".format(next)))
-                headers.append(("Set-Cookie", "board={}".format(board)))
+                headers.append(("Set-Cookie", "board={}".format(",".join(board))))
                 p = extractCode("displayBoard.html")
                 nextPlayer = p2.name if next == p2.side else p1.name
                 page = formattedPage(p, n1, s1, n2, s2, board, playerForm.format(nextPlayer))
@@ -224,7 +228,3 @@ port = 8000
 httpd = wsgiref.simple_server.make_server('', 8000, application)
 print("Server serving at port:", port)
 httpd.serve_forever()
-
-
-
-
