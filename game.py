@@ -12,6 +12,11 @@ def extractCode(filename):
 playerForm = '''
     <form action="/input">
         <h3><font face="Courier new" size="4">{} Move (1 to 9): </font><input type="text" name="move"><input type="submit" name="Enter"></h3>
+        <font face="Courier new" size="2" color="white">
+            <h3>With 1 as the Top Left, and 9 as the Bottom Right.</h3>
+            <h3>Going from left to right across the row, with the </h3>
+            <h3>position value at the leftmost as the smallest. </h3>
+        </font>
     </form>
 '''
 
@@ -21,8 +26,10 @@ startButton = '''
 </form>
 '''
 
+
+
 homeButton = '''
-<form action="/restart">
+<form action="/">
     <input type="submit" value="Home">
 </form>
 '''
@@ -53,6 +60,12 @@ def application(environ, start_response):
     params = urllib.parse.parse_qs(environ["QUERY_STRING"])
 
     if path == "/":
+        if 'HTTP_COOKIE' in environ:
+            cookies = http.cookies.SimpleCookie()
+            cookies.load(environ['HTTP_COOKIE'])
+            for cookie in ['mode', 'side1', 'next', 'board']:
+                if cookie in cookies:
+                    headers.append(('Set-Cookie', '{}=0; expires=Thu, 01 Jan 1970 00:00:00 GMT'.format(cookie)))
         start_response("200 OK", headers)
         page = extractCode("homePage.html")
         return [page.encode()]
@@ -174,13 +187,22 @@ def application(environ, start_response):
             p2 = func.Player(s2, board, n2)
             player = p1 if next == p1.side else p2
         # Check input move
-        response = "<h3>Please enter a valid move.</h3>"
+        response = '<h3>Please enter a valid move.</h3>'
 
         move = params['move'][0] if 'move' in params else None
 
         if move:
             if (move.isdigit() and player.validMove(int(move)-1)):
                 player.makeMove(int(move) - 1)
+
+                # if is computer's turn, computer make move
+                if mode == 1:
+                    move = p2.chooseMove()
+                    p2.makeMove(move)
+                    next = p1.side
+                else:
+                    next = "X" if player.side == "O" else "O"
+
                 # Check whether the board is full or a side had won
                 if func.win(p1.side, board) or func.win(p2.side, board):
                     winner = p1.name if func.win(p1.side, board) else p2.name
@@ -197,13 +219,6 @@ def application(environ, start_response):
                     start_response("200 OK", headers)
                     return [page.encode()]
 
-                # if is computer's turn, computer make move
-                if mode == 1:
-                    move = p2.chooseMove()
-                    p2.makeMove(move)
-                    next = p1.side
-                else:
-                    next = "X" if player.side == "O" else "O"
                 headers.append(("Set-Cookie", "next={}".format(next)))
                 headers.append(("Set-Cookie", "board={}".format(",".join(board))))
                 p = extractCode("displayBoard.html")
@@ -218,7 +233,6 @@ def application(environ, start_response):
         page = formattedPage(p, n1, s1, n2, s2, board, playerForm.format(player.name))
         page += "<h3>Please enter a valid move.</h3>"
         return [page.encode()]
-
 
     else:
         start_response("404 Not Found", headers)
