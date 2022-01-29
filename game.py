@@ -196,12 +196,13 @@ def application(environ, start_response):
                 player.makeMove(int(move) - 1)
 
                 # if is computer's turn, computer make move
-                if mode == 1:
-                    move = p2.chooseMove()
-                    p2.makeMove(move)
-                    next = p1.side
-                else:
-                    next = "X" if player.side == "O" else "O"
+                if not (func.win(p1.side, board) or func.win(p2.side, board) or func.boardFull(board)):
+                    if mode == 1:
+                        move = p2.chooseMove()
+                        p2.makeMove(move)
+                        next = p1.side
+                    else:
+                        next = "X" if player.side == "O" else "O"
 
                 # Check whether the board is full or a side had won
                 if func.win(p1.side, board) or func.win(p2.side, board):
